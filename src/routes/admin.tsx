@@ -11,11 +11,20 @@ import {
   Home,
   LogOut,
   Bell,
+  MoreHorizontal,
 } from "lucide-react";
 import { Logo } from "@/components/aura/Logo";
 import { GlowBackground } from "@/components/aura/GlowBackground";
 import { cn } from "@/lib/utils";
 import { isAuthenticated, clearSession } from "@/lib/auth";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from "@/components/ui/drawer";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: ({ location, request }) => {
@@ -49,6 +58,9 @@ function AdminLayout() {
   if (path === "/admin/signin" || path === "/admin/signup") {
     return <Outlet />;
   }
+
+  const moreItems = nav.slice(3, 6); // Verified, Pending, Analytics
+
   return (
     <div className="relative min-h-screen w-full">
       <GlowBackground />
@@ -128,7 +140,7 @@ function AdminLayout() {
               <Home className="h-5 w-5" />
               Home
             </Link>
-            {nav.slice(0, 4).map((item) => {
+            {nav.slice(0, 3).map((item) => {
               const active = item.exact ? path === item.to : path.startsWith(item.to);
               return (
                 <Link
@@ -144,6 +156,47 @@ function AdminLayout() {
                 </Link>
               );
             })}
+
+            {/* More Menu */}
+            <Drawer>
+              <DrawerTrigger asChild>
+                <button className="flex flex-col items-center gap-1 rounded-lg px-3 py-1.5 text-[10px] text-muted-foreground">
+                  <MoreHorizontal className="h-5 w-5" />
+                  More
+                </button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader className="pb-2">
+                  <DrawerTitle className="text-center text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    Management
+                  </DrawerTitle>
+                </DrawerHeader>
+                <div className="grid grid-cols-1 gap-1 px-4 pb-8">
+                  {moreItems.map((item) => {
+                    const active = path.startsWith(item.to);
+                    return (
+                      <DrawerClose key={item.to} asChild>
+                        <Link
+                          to={item.to}
+                          className={cn(
+                            "flex items-center gap-4 rounded-2xl px-4 py-4 transition-all",
+                            active ? "bg-mint-soft text-foreground" : "text-muted-foreground hover:bg-muted"
+                          )}
+                        >
+                          <div className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-xl bg-card shadow-soft",
+                            active && "bg-background"
+                          )}>
+                            <item.icon className={cn("h-5 w-5", active && "text-mint")} />
+                          </div>
+                          <span className="font-medium">{item.label}</span>
+                        </Link>
+                      </DrawerClose>
+                    );
+                  })}
+                </div>
+              </DrawerContent>
+            </Drawer>
           </nav>
         </div>
       </div>
