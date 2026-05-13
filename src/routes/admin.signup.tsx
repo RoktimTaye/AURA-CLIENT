@@ -4,6 +4,7 @@ import { Logo } from "@/components/aura/Logo";
 import { BackButton } from "@/components/aura/BackButton";
 import { PageShell } from "@/components/aura/PageShell";
 import { setSession } from "@/lib/auth";
+import { useState } from "react";
 
 export const Route = createFileRoute("/admin/signup")({
   head: () => ({ meta: [{ title: "Admin Sign Up — AURA" }] }),
@@ -26,6 +27,23 @@ function Field({ label, type = "text", placeholder }: { label: string; type?: st
 function SignUp() {
   const navigate = useNavigate();
   const router = useRouter();
+
+  const [formData,setFormData] = useState({email:'',password:'',fullName:''});
+
+  const handleSubmit = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+    const response = await fetch('/api/signup',{
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email:formData.email,
+        password: formData.password})
+      });
+      if (response.ok) {
+        navigate({to: "/admin/signin"});
+      } else {
+        alert("signup failed");
+      }
+  };
 
   return (
     <PageShell>

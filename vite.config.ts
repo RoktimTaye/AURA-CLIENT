@@ -15,4 +15,14 @@ export default defineConfig({
     tsconfigPaths(),
     process.env.NODE_ENV === "production" ? cloudflare() : null,
   ],
+  // Server Block 
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http//localhost:5173',
+        changeOrigin: true,
+        rewrite: (path) =>path.replace(/^\/api/, '')
+      },
+    },
+  },
 });

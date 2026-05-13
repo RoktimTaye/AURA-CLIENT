@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Logo } from "@/components/aura/Logo";
 import { BackButton } from "@/components/aura/BackButton";
 import { PageShell } from "@/components/aura/PageShell";
@@ -16,6 +16,24 @@ function SignIn() {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
   const router = useRouter();
+  const [email,setEmail] = useState('');
+  const [password,setPassword] = useState();
+  const handleLogin = async (e: React.SubmitEvent) => {
+    e.preventDefault();
+    const response = await fetch('/api/login',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({email,password}),
+    });
+
+    if (response.ok) {
+      setSession();
+      await router.invalidate();
+      navigate({to:"/admin"});
+    } else {
+      alert("Invalid email or password");
+    }
+  }
 
   return (
     <PageShell>
