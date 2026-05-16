@@ -17,7 +17,7 @@ function SignIn() {
   const navigate = useNavigate();
   const router = useRouter();
   const [email,setEmail] = useState('');
-  const [password,setPassword] = useState();
+  const [password,setPassword] = useState('');
   const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const response = await fetch('/api/login',{
@@ -53,10 +53,11 @@ function SignIn() {
         <form
           className="mt-8 space-y-5"
           onSubmit={async (e) => {
-            e.preventDefault();
-            setSession();
-            await router.invalidate();
-            navigate({ to: "/admin" });
+            handleLogin
+            // e.preventDefault();
+            // setSession();
+            // await router.invalidate();
+            // navigate({ to: "/admin" });
           }}
         >
           <div>
@@ -64,6 +65,7 @@ function SignIn() {
             <input
               type="email"
               placeholder="Enter your email"
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm"
             />
           </div>
@@ -73,6 +75,8 @@ function SignIn() {
               <input
                 type={show ? "text" : "password"}
                 placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 pr-11 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm"
               />
               <button
