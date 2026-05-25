@@ -18,21 +18,22 @@ function SignIn() {
   const router = useRouter();
   const [email,setEmail] = useState('');
   const [password,setPassword] = useState('');
+  
   const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    const response = await fetch('/api/login',{
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json'},
-      body: JSON.stringify({email,password}),
-    });
+    // const response = await fetch('/api/login',{
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json'},
+    //   body: JSON.stringify({email,password}),
+    // });
 
-    if (response.ok) {
+    // if (response.ok) {
       setSession();
       await router.invalidate();
       navigate({to:"/admin"});
-    } else {
-      alert("Invalid email or password");
-    }
+  //   } else {
+  //     alert("Invalid email or password");
+  //   // }
   }
 
   return (
@@ -52,13 +53,14 @@ function SignIn() {
 
         <form
           className="mt-8 space-y-5"
-          onSubmit={async (e) => {
-            handleLogin
-            // e.preventDefault();
-            // setSession();
-            // await router.invalidate();
-            // navigate({ to: "/admin" });
-          }}
+          onSubmit={handleLogin}
+          // onSubmit={async (e) => {
+          //   handleLogin
+          //   // e.preventDefault();
+          //   // setSession();
+          //   // await router.invalidate();
+          //   // navigate({ to: "/admin" });
+          // }}
         >
           <div>
             <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</label>
