@@ -63,23 +63,29 @@ function SignUp() {
   const navigate = useNavigate();
   const router = useRouter();
 
-  const [formData, setFormData] = useState({ email: '', password: '', fullName: '' });
+  const [formData, setFormData] = useState({ email: '', password: '',confirmPassword: '', fullName: '' });
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-  //   const response = await fetch('/api/signup', {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json' },
-  //     body: JSON.stringify({
-  //       email: formData.email,
-  //       password: formData.password
-  //     })
-  //   });
-  //   if (response.ok) {
+
+    if (formData.password!== formData.confirmPassword){
+      alert("passwords do not match");
+      return;
+    }
+    const response = await fetch('/api/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      })
+    });
+    if (response.ok) {
       navigate({ to: "/admin/signin" });
-  //   } else {
-  //     alert("signup failed");
-  //   }
+    } else {
+      alert("signup failed");
+    }
   };
 
   return (
@@ -106,13 +112,13 @@ function SignUp() {
         // }}
 
         >
-          
-          <Field label="Full Name" placeholder="Enter your full name" />
+
+          {/* <Field label="Full Name" placeholder="Enter your full name" />
           <Field label="Email" type="email" placeholder="Enter your email" />
           <Field label="Password" type="password" placeholder="Create a password" />
           <Field label="Confirm Password" type="password" placeholder="Confirm your password" />
-          
-          {/* <Field
+           */}
+          <Field
             label="Full Name"
             placeholder="Enter your full name"
             value={formData.fullName}
@@ -145,8 +151,10 @@ function SignUp() {
             label="Confirm Password"
             type="password"
             placeholder="Confirm your password"
-            // Note: You might want to add a confirmPassword state later to validate they match
-          /> */}
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({...formData,confirmPassword:e.target.value})}
+          // Note: You might want to add a confirmPassword state later to validate they match
+          />
           <button className="w-full rounded-xl bg-foreground py-3.5 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.01] hover:shadow-glow-sm">
             Sign Up
           </button>

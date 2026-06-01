@@ -1,6 +1,6 @@
-export const setSession = () => {
+export const setSession = (token: string) => {
   if (typeof document !== "undefined") {
-    document.cookie = "aura_admin_session=true; path=/; SameSite=Strict";
+    document.cookie = `aura_admin_session=${token}; path=/; SameSite=Strict`;
   }
 };
 
@@ -12,5 +12,13 @@ export const clearSession = () => {
 
 export const isAuthenticated = (cookieHeader?: string) => {
   const cookieString = cookieHeader || (typeof document !== "undefined" ? document.cookie : "");
-  return cookieString.split(";").some((item) => item.trim() === "aura_admin_session=true");
+  const cookies = cookieString.split(";").map((item) => item.trim());
+  return cookies.some((item) => item.startsWith("aura_admin_session=") && item.split("=")[1]?.length > 0);
 };
+
+//   const cookies = cookieString.split(";").map((item) => item.trim());
+//   return cookies.some((item)=> item.startsWith("aura_admin_session=") && item.split("=")[1]?.length > 0);
+// };
+// const cookies = cookieString.split(";").map((item) => item.trim());
+// return cookies.some((item) => item.startsWith("aura_admin_session=") && item.split("=")[1]?.length > 0);
+//    };

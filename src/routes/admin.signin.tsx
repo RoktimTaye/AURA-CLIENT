@@ -21,19 +21,21 @@ function SignIn() {
   
   const handleLogin = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    // const response = await fetch('/api/login',{
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json'},
-    //   body: JSON.stringify({email,password}),
-    // });
+    const response = await fetch('/api/login',{
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json'},
+      body: JSON.stringify({email,password}),
+    });
 
-    // if (response.ok) {
-      setSession();
+    if (response.ok) {
+      const data = await(response.json())
+      const token = data.access_token;
+      setSession(token);
       await router.invalidate();
-      navigate({to:"/admin"});
-  //   } else {
-  //     alert("Invalid email or password");
-  //   // }
+      navigate({ to: "/admin"});
+    } else {
+      alert("Invalid email or password");
+    }
   }
 
   return (
@@ -56,10 +58,10 @@ function SignIn() {
           onSubmit={handleLogin}
           // onSubmit={async (e) => {
           //   handleLogin
-          //   // e.preventDefault();
-          //   // setSession();
-          //   // await router.invalidate();
-          //   // navigate({ to: "/admin" });
+          //   e.preventDefault();
+          //   setSession();
+          //   await router.invalidate();
+          //   navigate({ to: "/admin" });
           // }}
         >
           <div>
@@ -67,6 +69,7 @@ function SignIn() {
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm"
             />
