@@ -24,7 +24,7 @@ function UploadPage() {
         transition={{ duration: 0.5 }}
         className="mt-12"
       >
-        <UploadForm />
+        <UploadForm isAdmin={false} />
       </motion.div>
     </PageShell>
   );

@@ -10,6 +10,13 @@ export const clearSession = () => {
   }
 };
 
+export const getSession = (cookieHeader?: string) => {
+  const cookieString = cookieHeader || (typeof document !== "undefined" ? document.cookie : "");
+  const cookies = cookieString.split(";").map((item) => item.trim());
+  const sessionCookie = cookies.find((item) => item.startsWith("aura_admin_session="));
+  return sessionCookie ? sessionCookie.split("=")[1] : null;
+};
+
 export const isAuthenticated = (cookieHeader?: string) => {
   const cookieString = cookieHeader || (typeof document !== "undefined" ? document.cookie : "");
   const cookies = cookieString.split(";").map((item) => item.trim());

@@ -1,7 +1,8 @@
 import { Upload, MapPin, Package, IndianRupee, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-
+import { getSession } from "@/lib/auth";
+import { toast } from "sonner";
 function Field({
   label,
   icon: Icon,
@@ -38,7 +39,7 @@ function Field({
   );
 }
 
-export function UploadForm({ title = "Upload Grocery Price Details" }: { title?: string }) {
+export function UploadForm({ title = "Upload Grocery Price Details", isAdmin = false }: { title?: string; isAdmin?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState("");
   const [entries, setEntries] = useState([{ id: Date.now(), item: "", price: "" }]);
@@ -59,6 +60,85 @@ export function UploadForm({ title = "Upload Grocery Price Details" }: { title?:
     );
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log("Submit initiated...");
+    setLoading(true);
+
+    try {
+      const token = getSession();
+      console.log("Token retrieved:", token ? "Yes" : "No");
+      
+      // const userId = 1;
+
+      if (isAdmin && !token) {
+        console.warn("No token found, showing error toast");
+        toast.error("You must be logged in to upload data");
+        setLoading(false);
+        return;
+      }
+
+      if (!location.trim()) {
+        toast.error("Please enter a location");
+        setLoading(false);
+        return;
+      }
+
+      console.log("Preparing payload for", entries.length, "entries");
+
+      const uploadPromises = entries.map(async (entry) => {
+        // Simple parsing for price (extracting digits)
+        const rawPrice = entry.price || "0";
+        const numericPrice = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 0;
+        
+        // Parsing location string: "State, District, Market"
+        const locParts = (location || "").split(',').map(p => p.trim());
+
+        const payload = {
+          item_name: entry.item || "Unknown Item",
+          location_name: locParts[2] || locParts[0] || "Unknown Location",
+          district: locParts[1] || "Unknown District",
+          state: locParts[0] || "Unknown State",
+          price: numericPrice,
+          distance_miles: 0.0
+        };
+
+        console.log("Sending payload:", payload);
+
+        const response = await fetch(`/api/upload`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? {'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text().catch(() => "Unknown error");
+          console.error("Upload failed for item:", entry.item, "Status:", response.status, "Error:", errorData);
+          throw new Error(`Failed to upload ${entry.item}: ${response.statusText}`);
+        }
+        
+        return response.json();
+      });
+
+      await Promise.all(uploadPromises);
+      console.log("All uploads completed successfully");
+      toast.success("All price details uploaded successfully!");
+      
+      // Reset form on success
+      setEntries([{ id: Date.now(), item: "", price: "" }]);
+      setLocation("");
+    } catch (error) {
+      console.error("Catastrophic upload error:", error);
+      const message = error instanceof Error ? error.message : "Failed to upload data";
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-full max-w-2xl rounded-3xl border border-border bg-card p-8 shadow-soft md:p-10">
       <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
@@ -66,11 +146,14 @@ export function UploadForm({ title = "Upload Grocery Price Details" }: { title?:
 
       <form
         className="mt-8 space-y-6"
+        onSubmit={handleSubmit}
+        /* Old placeholder logic:
         onSubmit={(e) => {
           e.preventDefault();
           setLoading(true);
           setTimeout(() => setLoading(false), 1200);
         }}
+        */
       >
         <Field 
           label="Location" 
