@@ -14,29 +14,50 @@ export const Route = createFileRoute("/admin/signin")({
 
 function SignIn() {
   const [show, setShow] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const router = useRouter();
-  const [email,setEmail] = useState('');
-  const [password,setPassword] = useState('');
-  
-  const handleLogin = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-    const response = await fetch('/api/login',{
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json'},
-      body: JSON.stringify({email,password}),
-    });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-    if (response.ok) {
-      const data = await(response.json())
-      const token = data.access_token;
-      setSession(token);
-      await router.invalidate();
-      navigate({ to: "/admin"});
-    } else {
-      alert("Invalid email or password");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoading) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const token = data.access_token;
+        
+        // Try to get name from response, or fall back to what's in localStorage from signup
+        // or finally default to "Admin"
+        const userName = data.fullName || data.user?.fullName || data.name || localStorage.getItem("aura_admin_name") || "Admin";
+        
+        setSession(token, userName);
+        
+        // Invalidate the router to ensure all auth-dependent data is refreshed
+        // but don't await it if it causes a visible reload on the current page
+        router.invalidate();
+        
+        // Navigate to the admin dashboard
+        navigate({ to: "/admin" });
+      } else {
+        alert("Invalid email or password");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("An error occurred during sign in");
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <PageShell>
@@ -53,17 +74,7 @@ function SignIn() {
         <h1 className="text-3xl font-semibold tracking-tight">Sign In</h1>
         <p className="mt-2 text-sm text-muted-foreground">Welcome back! Please sign in to your admin account.</p>
 
-        <form
-          className="mt-8 space-y-5"
-          onSubmit={handleLogin}
-          // onSubmit={async (e) => {
-          //   handleLogin
-          //   e.preventDefault();
-          //   setSession();
-          //   await router.invalidate();
-          //   navigate({ to: "/admin" });
-          // }}
-        >
+        <form className="mt-8 space-y-5" onSubmit={handleLogin}>
           <div>
             <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Email</label>
             <input
@@ -71,7 +82,8 @@ function SignIn() {
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm"
+              disabled={isLoading}
+              className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm disabled:opacity-50"
             />
           </div>
           <div>
@@ -82,22 +94,30 @@ function SignIn() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 pr-11 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm"
+                disabled={isLoading}
+                className="mt-2 w-full rounded-xl border border-border bg-background px-4 py-3 pr-11 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShow(!show)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                disabled={isLoading}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground disabled:opacity-50"
               >
                 {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
           <div className="text-right">
-            <a className="text-xs text-muted-foreground hover:text-foreground" href="#">Forgot password?</a>
+            <a className="text-xs text-muted-foreground hover:text-foreground" href="#">
+              Forgot password?
+            </a>
           </div>
-          <button className="w-full rounded-xl bg-foreground py-3.5 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.01] hover:shadow-glow-sm">
-            Sign In
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-xl bg-foreground py-3.5 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.01] hover:shadow-glow-sm disabled:opacity-70 disabled:hover:scale-100"
+          >
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
           <p className="text-center text-xs text-muted-foreground">
             Don't have an account?{" "}

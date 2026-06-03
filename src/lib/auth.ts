@@ -1,13 +1,24 @@
-export const setSession = (token: string) => {
+export const setSession = (token: string, userName?: string) => {
   if (typeof document !== "undefined") {
     document.cookie = `aura_admin_session=${token}; path=/; SameSite=Strict`;
+    if (userName) {
+      localStorage.setItem("aura_admin_name", userName);
+    }
   }
 };
 
 export const clearSession = () => {
   if (typeof document !== "undefined") {
     document.cookie = "aura_admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    localStorage.removeItem("aura_admin_name");
   }
+};
+
+export const getUserName = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("aura_admin_name") || "Admin";
+  }
+  return "Admin";
 };
 
 export const getSession = (cookieHeader?: string) => {

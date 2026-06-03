@@ -61,30 +61,51 @@ function Field({
 
 function SignUp() {
   const navigate = useNavigate();
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    fullName: "",
+  });
 
-  const [formData, setFormData] = useState({ email: '', password: '',confirmPassword: '', fullName: '' });
-
-  const handleSubmit = async (e: React.SubmitEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
 
-    if (formData.password!== formData.confirmPassword){
-      alert("passwords do not match");
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
       return;
     }
-    const response = await fetch('/api/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password
-      })
-    });
-    if (response.ok) {
-      navigate({ to: "/admin/signin" });
-    } else {
-      alert("signup failed");
+
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          role: "admin"
+        }),
+      });
+
+      if (response.ok) {
+        // Save name for the avatar before navigating
+        if (typeof window !== "undefined") {
+          localStorage.setItem("aura_admin_name", formData.fullName);
+        }
+        navigate({ to: "/admin/signin" });
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(errorData.message || "Signup failed");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("An error occurred during sign up");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,61 +123,44 @@ function SignUp() {
       >
         <h1 className="text-3xl font-semibold tracking-tight">Sign Up</h1>
         <p className="mt-2 text-sm text-muted-foreground">Create your admin account to get started.</p>
-        <form
-          className="mt-8 space-y-5"
-          onSubmit={handleSubmit}
-        // async (e) => {
-        //   e.preventDefault();
-        //   // In a real app, you'd call your signup API here
-        //   navigate({ to: "/admin/signin" });
-        // }}
-
-        >
-
-          {/* <Field label="Full Name" placeholder="Enter your full name" />
-          <Field label="Email" type="email" placeholder="Enter your email" />
-          <Field label="Password" type="password" placeholder="Create a password" />
-          <Field label="Confirm Password" type="password" placeholder="Confirm your password" />
-           */}
+        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
           <Field
             label="Full Name"
             placeholder="Enter your full name"
             value={formData.fullName}
-            onChange={(e) => setFormData({
-              ...formData,
-              fullName: e.target.value
-            })}
+            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+            disabled={isLoading}
           />
           <Field
             label="Email"
             type="email"
             placeholder="Enter your email"
             value={formData.email}
-            onChange={(e) => setFormData({
-              ...formData, email:
-                e.target.value
-            })}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            disabled={isLoading}
           />
           <Field
             label="Password"
             type="password"
             placeholder="Create a password"
             value={formData.password}
-            onChange={(e) => setFormData({
-              ...formData,
-              password: e.target.value
-            })}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            disabled={isLoading}
           />
           <Field
             label="Confirm Password"
             type="password"
             placeholder="Confirm your password"
             value={formData.confirmPassword}
-            onChange={(e) => setFormData({...formData,confirmPassword:e.target.value})}
-          // Note: You might want to add a confirmPassword state later to validate they match
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            disabled={isLoading}
           />
-          <button className="w-full rounded-xl bg-foreground py-3.5 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.01] hover:shadow-glow-sm">
-            Sign Up
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full rounded-xl bg-foreground py-3.5 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.01] hover:shadow-glow-sm disabled:opacity-70 disabled:hover:scale-100"
+          >
+            {isLoading ? "Creating Account..." : "Sign Up"}
           </button>
           <p className="text-center text-xs text-muted-foreground">
             Already have an account?{" "}

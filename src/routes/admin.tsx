@@ -16,7 +16,8 @@ import {
 import { Logo } from "@/components/aura/Logo";
 import { GlowBackground } from "@/components/aura/GlowBackground";
 import { cn } from "@/lib/utils";
-import { isAuthenticated, clearSession } from "@/lib/auth";
+import { isAuthenticated, clearSession, getUserName } from "@/lib/auth";
+import { useState, useEffect } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -54,6 +55,16 @@ const nav: NavItem[] = [
 
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const [name, setName] = useState("Admin");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setName(getUserName());
+    }
+  }, [path]);
+
+  const userInitial = name.charAt(0).toUpperCase();
+
   // hide layout on signin/signup
   if (path === "/admin/signin" || path === "/admin/signup") {
     return <Outlet />;
@@ -110,13 +121,17 @@ function AdminLayout() {
             </div>
             <div className="hidden text-sm text-muted-foreground md:block">Admin Workspace</div>
             <div className="flex items-center gap-4">
+              {/* Commented out notification bell for future use
               <button className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card">
                 <Bell className="h-4 w-4" />
                 <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-mint" />
               </button>
+              */}
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-mint-soft text-xs font-semibold">A</div>
-                <span className="hidden text-sm font-medium md:block">Admin</span>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-mint-soft text-xs font-semibold">
+                  {userInitial}
+                </div>
+                <span className="hidden text-sm font-medium md:block">{name}</span>
               </div>
               <Link
                 to="/"
@@ -128,7 +143,7 @@ function AdminLayout() {
             </div>
           </header>
           <main className="flex-1 px-5 py-8 md:px-10">
-            <Outlet />
+            <Outlet context={{ name }} />
           </main>
 
           {/* Mobile bottom nav */}
