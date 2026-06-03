@@ -13,10 +13,13 @@ export const Route = createFileRoute("/upload")({
 function UploadPage() {
   return (
     <PageShell>
-      <div className="flex items-center justify-between">
+      <div className="relative flex items-center justify-between">
         <BackButton to="/welcome" />
-        <Logo />
-        <div className="w-12" />
+        <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center pointer-events-none">
+          <div className="pointer-events-auto">
+            <Logo />
+          </div>
+        </div>
       </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}

@@ -115,12 +115,19 @@ function AdminLayout() {
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/70 px-5 py-4 backdrop-blur md:px-10">
-            <div className="md:hidden">
-              <Logo to="/admin" />
+          <header className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-background/70 px-5 py-4 backdrop-blur md:px-10 relative">
+            {/* Perfectly centered logo for mobile using full width absolute wrapper */}
+            <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center md:hidden pointer-events-none">
+              <div className="pointer-events-auto">
+                <Logo to="/admin" />
+              </div>
             </div>
+            
+            {/* Empty div to take up space on the left to balance the right side items if needed, or just let flex-between handle the edges */}
+            <div className="w-10 md:hidden" />
+
             <div className="hidden text-sm text-muted-foreground md:block">Admin Workspace</div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 relative z-10">
               {/* Commented out notification bell for future use
               <button className="relative flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card">
                 <Bell className="h-4 w-4" />

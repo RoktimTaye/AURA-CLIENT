@@ -58,10 +58,14 @@ function ActionCard({
 function Welcome() {
   return (
     <PageShell>
-      <div className="flex items-center justify-between">
+      <div className="relative flex items-center justify-between">
         <BackButton to="/" />
-        <Logo />
-        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card">
+        <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center pointer-events-none">
+          <div className="pointer-events-auto">
+            <Logo />
+          </div>
+        </div>
+        <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card relative z-10">
           <User className="h-4 w-4 text-muted-foreground" />
         </div>
       </div>

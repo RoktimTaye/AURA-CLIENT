@@ -15,6 +15,7 @@ import { Route as UploadRouteImport } from './routes/upload'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as ViewItemIdRouteImport } from './routes/view.$itemId'
 import { Route as AdminVerifiedRouteImport } from './routes/admin.verified'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminUploadRouteImport } from './routes/admin.upload'
@@ -54,6 +55,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const ViewItemIdRoute = ViewItemIdRouteImport.update({
+  id: '/$itemId',
+  path: '/$itemId',
+  getParentRoute: () => ViewRoute,
 } as any)
 const AdminVerifiedRoute = AdminVerifiedRouteImport.update({
   id: '/verified',
@@ -105,7 +111,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/upload': typeof UploadRoute
-  '/view': typeof ViewRoute
+  '/view': typeof ViewRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/data': typeof AdminDataRoute
@@ -116,12 +122,13 @@ export interface FileRoutesByFullPath {
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verified': typeof AdminVerifiedRoute
+  '/view/$itemId': typeof ViewItemIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/upload': typeof UploadRoute
-  '/view': typeof ViewRoute
+  '/view': typeof ViewRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/data': typeof AdminDataRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verified': typeof AdminVerifiedRoute
+  '/view/$itemId': typeof ViewItemIdRoute
   '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
@@ -139,7 +147,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/upload': typeof UploadRoute
-  '/view': typeof ViewRoute
+  '/view': typeof ViewRouteWithChildren
   '/welcome': typeof WelcomeRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/data': typeof AdminDataRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/admin/upload': typeof AdminUploadRoute
   '/admin/users': typeof AdminUsersRoute
   '/admin/verified': typeof AdminVerifiedRoute
+  '/view/$itemId': typeof ViewItemIdRoute
   '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin/users'
     | '/admin/verified'
+    | '/view/$itemId'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin/users'
     | '/admin/verified'
+    | '/view/$itemId'
     | '/admin'
   id:
     | '__root__'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/admin/upload'
     | '/admin/users'
     | '/admin/verified'
+    | '/view/$itemId'
     | '/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -209,7 +221,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   UploadRoute: typeof UploadRoute
-  ViewRoute: typeof ViewRoute
+  ViewRoute: typeof ViewRouteWithChildren
   WelcomeRoute: typeof WelcomeRoute
 }
 
@@ -256,6 +268,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/view/$itemId': {
+      id: '/view/$itemId'
+      path: '/$itemId'
+      fullPath: '/view/$itemId'
+      preLoaderRoute: typeof ViewItemIdRouteImport
+      parentRoute: typeof ViewRoute
     }
     '/admin/verified': {
       id: '/admin/verified'
@@ -351,11 +370,21 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface ViewRouteChildren {
+  ViewItemIdRoute: typeof ViewItemIdRoute
+}
+
+const ViewRouteChildren: ViewRouteChildren = {
+  ViewItemIdRoute: ViewItemIdRoute,
+}
+
+const ViewRouteWithChildren = ViewRoute._addFileChildren(ViewRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   UploadRoute: UploadRoute,
-  ViewRoute: ViewRoute,
+  ViewRoute: ViewRouteWithChildren,
   WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport

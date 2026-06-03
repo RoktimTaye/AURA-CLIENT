@@ -1,11 +1,12 @@
 export type GroceryRow = {
   id: number;
+  itemId?: number; // Optional as sample data doesn't have it
   item: string;
   price: string;
   range: string;
   locality: string;
   trust: number;
-  status: "Verified" | "Pending";
+  status: "Verified" | "Pending" | "APPROVED" | "FLAGGED";
 };
 
 export const sampleData: GroceryRow[] = [

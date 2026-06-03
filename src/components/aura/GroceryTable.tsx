@@ -7,10 +7,12 @@ export function GroceryTable({
   rows,
   showStatus = false,
   showActions = false,
+  onRowClick,
 }: {
   rows: GroceryRow[];
   showStatus?: boolean;
   showActions?: boolean;
+  onRowClick?: (row: GroceryRow) => void;
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
@@ -35,7 +37,11 @@ export function GroceryTable({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04, duration: 0.3 }}
-                className="border-t border-border transition-colors hover:bg-mint-soft/30"
+                onClick={() => onRowClick?.(row)}
+                className={cn(
+                  "border-t border-border transition-colors hover:bg-mint-soft/30",
+                  onRowClick && "cursor-pointer"
+                )}
               >
                 <td className="px-5 py-4 text-muted-foreground">{i + 1}</td>
                 <td className="px-5 py-4 font-medium">{row.item}</td>
