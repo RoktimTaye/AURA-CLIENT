@@ -143,7 +143,7 @@ function ItemDetailPage() {
           >
             <div className="lg:col-span-2">
               <div className={cn(
-                "relative overflow-hidden rounded-[2rem] border p-8 md:p-12",
+                "relative overflow-hidden rounded-4xl border p-8 md:p-12",
                 "glass-card shadow-glow-sm transition-all",
                 isBuyNow ? "border-mint/30 bg-mint-soft/20" : "border-orange-200/50 bg-orange-50/30"
               )}>
@@ -152,7 +152,7 @@ function ItemDetailPage() {
                     <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
                       AI Market Intelligence
                     </span>
-                    <h1 className="mt-2 max-w-full text-4xl font-bold tracking-tighter uppercase text-balance sm:text-5xl md:text-6xl lg:text-7xl break-words">
+                    <h1 className="mt-2 max-w-full text-4xl font-bold tracking-tighter uppercase text-balance sm:text-5xl md:text-6xl lg:text-7xl wrap-break-word">
                       {itemName || "Item"}
                     </h1>
                     <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground md:justify-start">
@@ -169,7 +169,7 @@ function ItemDetailPage() {
                       {isBuyNow ? <TrendingDown className="h-8 w-8 text-mint" /> : <Clock className="h-8 w-8" />}
                       <span className="text-2xl font-bold uppercase tracking-tight">{data.advice}</span>
                     </div>
-                    <p className="mt-4 max-w-[240px] text-center md:text-right text-sm leading-relaxed text-muted-foreground">
+                    <p className="mt-4 max-w-60 text-center md:text-right text-sm leading-relaxed text-muted-foreground">
                       {isBuyNow 
                         ? "Prices are currently at a local minimum. Our AI suggests stocks are stable for now." 
                         : `Prices are expected to drop significantly by ${chartData[chartData.length - 1]?.date || 'next week'}.`}
@@ -210,7 +210,7 @@ function ItemDetailPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-card rounded-[2rem] border border-border p-8 shadow-soft"
+            className="glass-card rounded-4xl border border-border p-8 shadow-soft"
           >
             <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
               <div>
@@ -229,7 +229,7 @@ function ItemDetailPage() {
               </div>
             </div>
 
-            <div className="h-[400px] w-full">
+            <div className="h-100 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>

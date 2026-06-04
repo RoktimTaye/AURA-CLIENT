@@ -8,12 +8,26 @@ export function GroceryTable({
   showStatus = false,
   showActions = false,
   onRowClick,
+  totalCount = 0,
+  currentPage = 1,
+  pageSize = 20,
+  onPageChange,
+  onVote,
+  votedIds = [],
 }: {
   rows: GroceryRow[];
   showStatus?: boolean;
   showActions?: boolean;
   onRowClick?: (row: GroceryRow) => void;
+  onVote?: (entryId: number) => void;
+  votedIds?: number[];
+  totalCount?: number;
+  currentPage?: number;
+  pageSize?: number;
+  onPageChange?: (page: number) => void;
 }) {
+  const totalPages = Math.ceil(totalCount / pageSize);
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       <div className="overflow-x-auto">
@@ -43,15 +57,28 @@ export function GroceryTable({
                   onRowClick && "cursor-pointer"
                 )}
               >
-                <td className="px-5 py-4 text-muted-foreground">{i + 1}</td>
+                <td className="px-5 py-4 text-muted-foreground">{(currentPage - 1) * pageSize + i + 1}</td>
                 <td className="px-5 py-4 font-medium">{row.item}</td>
                 <td className="px-5 py-4">{row.price}</td>
                 <td className="px-5 py-4 text-muted-foreground">{row.range}</td>
                 <td className="px-5 py-4">{row.locality}</td>
                 <td className="px-5 py-4">
-                  <span className="inline-flex items-center gap-1.5 text-foreground">
-                    {row.trust}% <ThumbsUp className="h-3.5 w-3.5 text-mint" />
-                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onVote?.(row.id);
+                    }}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 transition-all active:scale-95 hover:scale-110",
+                      votedIds.includes(row.id) ? "text-mint font-bold" : "text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {row.trust}
+                    <ThumbsUp
+                      className="h-3.5 w-3.5"
+                      fill={votedIds.includes(row.id) ? "currentColor" : "none"}
+                    />
+                  </button>
                 </td>
                 {showStatus && (
                   <td className="px-5 py-4">
@@ -85,19 +112,27 @@ export function GroceryTable({
         </table>
       </div>
       <div className="flex items-center justify-between border-t border-border px-5 py-4 text-xs text-muted-foreground">
-        <span>Showing 1 to {rows.length} of 245 entries</span>
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, "...", 49].map((p, i) => (
-            <button
-              key={i}
-              className={cn(
-                "h-8 min-w-8 rounded-md px-2 text-xs transition-colors",
-                p === 1 ? "bg-mint text-foreground" : "hover:bg-muted",
-              )}
-            >
-              {p}
-            </button>
-          ))}
+        <span>
+          Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount.toLocaleString()} entries
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => onPageChange?.(currentPage - 1)}
+            className="h-8 px-3 rounded-md border border-border bg-card text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            Prev
+          </button>
+          <span className="font-semibold text-foreground">
+            Page {currentPage} of {totalPages || 1}
+          </span>
+          <button
+            disabled={currentPage === totalPages || totalPages === 0}
+            onClick={() => onPageChange?.(currentPage + 1)}
+            className="h-8 px-3 rounded-md border border-border bg-card text-xs font-medium transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>

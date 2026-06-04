@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate, Outlet, useLocation } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { Search, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Logo } from "@/components/aura/Logo";
 import { BackButton } from "@/components/aura/BackButton";
 import { PageShell } from "@/components/aura/PageShell";
@@ -16,26 +17,41 @@ export const Route = createFileRoute("/view")({
 function ViewPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
   const isDetailPage = location.pathname.startsWith('/view/') && location.pathname !== '/view';
   
   const [district, setDistrict] = useState("");
   const [item, setItem] = useState("");
-  const [rows, setRows] = useState<GroceryRow[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
+  const [searchParams, setSearchParams] = useState({ district: "", item: "" });
+  const [votedIds, setVotedIds] = useState<number[]>([]);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const query = new URLSearchParams();
-      if (district) query.append("district", district);
-      if (item) query.append("item", item);
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('aura_user_votes') || '[]');
+    setVotedIds(saved);
+  }, []);
+
+  const queryKey = ["directory", searchParams, page];
+
+  const { data, isLoading: loading } = useQuery({
+    queryKey,
+    queryFn: async () => {
+      const skip = (page - 1) * pageSize;
+      const query = new URLSearchParams({
+        limit: pageSize.toString(),
+        skip: skip.toString()
+      });
+      if (searchParams.district) query.append("district", searchParams.district);
+      if (searchParams.item) query.append("item", searchParams.item);
       
       const response = await fetch(`/api/directory?${query.toString()}`);
-      const data = await response.json();
+      if (!response.ok) throw new Error("Network response was not ok");
+      const result = await response.json();
       
-      if (response.ok) {
-        // Map backend DirectoryView to frontend GroceryRow
-        const mappedRows: GroceryRow[] = data.map((d: any) => ({
+      return {
+        total: result.total,
+        rows: result.items.map((d: any) => ({
           id: d.id,
           itemId: d.item_id,
           item: d.item_name,
@@ -44,25 +60,70 @@ function ViewPage() {
           locality: d.locality_full,
           trust: d.votes,
           status: d.status === "APPROVED" ? "Verified" : "Pending"
-        }));
-        setRows(mappedRows);
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        }))
+      };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    if (!isDetailPage) {
-      fetchData();
-    }
-  }, [isDetailPage]);
+  const voteMutation = useMutation({
+    mutationFn: async ({ entryId, upvote }: { entryId: number; upvote: boolean }) => {
+      const response = await fetch(`/api/vote/${entryId}?upvote=${upvote}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) throw new Error("Vote failed");
+      return response.json();
+    },
+    onMutate: async ({ entryId, upvote }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+      const previousVotedIds = votedIds;
+
+      // Update UI state
+      const hasVoted = previousVotedIds.includes(entryId);
+      const updatedVotes = hasVoted
+        ? previousVotedIds.filter(id => id !== entryId)
+        : [...previousVotedIds, entryId];
+      
+      setVotedIds(updatedVotes);
+      localStorage.setItem('aura_user_votes', JSON.stringify(updatedVotes));
+      
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          rows: old.rows.map((row: GroceryRow) =>
+            row.id === entryId ? { ...row, trust: upvote ? row.trust + 1 : row.trust - 1 } : row
+          )
+        };
+      });
+      
+      return { previousData, previousVotedIds };
+    },
+    onError: (err, variables, context: any) => {
+      if (context) {
+        queryClient.setQueryData(queryKey, context.previousData);
+        setVotedIds(context.previousVotedIds);
+        localStorage.setItem('aura_user_votes', JSON.stringify(context.previousVotedIds));
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
+  });
+
+  const rows = data?.rows || [];
+  const totalCount = data?.total || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchData();
+    setPage(1);
+    setSearchParams({ district, item });
+  };
+
+  const handleVote = (entryId: number) => {
+    const hasVoted = votedIds.includes(entryId);
+    voteMutation.mutate({ entryId, upvote: !hasVoted });
   };
 
   const handleRowClick = (row: GroceryRow) => {
@@ -71,7 +132,7 @@ function ViewPage() {
         to: "/view/$itemId", 
         params: { itemId: row.itemId.toString() },
         search: { 
-          district: row.locality.split(' ')[0], // Best guess for district from full locality
+          district: row.locality.split(' ')[0], 
           itemName: row.item 
         } 
       });
@@ -140,7 +201,17 @@ function ViewPage() {
           <Loader2 className="h-6 w-6 animate-spin text-mint" />
         </div>
       ) : (
-        <GroceryTable rows={rows} onRowClick={handleRowClick} showStatus />
+        <GroceryTable 
+          rows={rows} 
+          onRowClick={handleRowClick} 
+          onVote={handleVote}
+          votedIds={votedIds}
+          showStatus 
+          totalCount={totalCount}
+          currentPage={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+        />
       )}
     </PageShell>
   );
