@@ -28,6 +28,13 @@ export function GroceryTable({
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  // Helper to format large vote counts (e.g. 1200 -> 1.2K)
+  const formatVotes = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
+    return num.toString();
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
       <div className="overflow-x-auto">
@@ -73,7 +80,7 @@ export function GroceryTable({
                       votedIds.includes(row.id) ? "text-mint font-bold" : "text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {row.trust}
+                    {formatVotes(row.trust)}
                     <ThumbsUp
                       className="h-3.5 w-3.5"
                       fill={votedIds.includes(row.id) ? "currentColor" : "none"}
