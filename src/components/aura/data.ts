@@ -4,6 +4,7 @@ export type GroceryRow = {
   item: string;
   price: string;
   range: string;
+  district?: string;
   locality: string;
   trust: number;
   status: "Verified" | "Pending" | "APPROVED" | "FLAGGED";

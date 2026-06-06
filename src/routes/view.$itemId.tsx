@@ -65,7 +65,8 @@ function ItemDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // FORCE STATIC MOCK DATA IMMEDIATELY FOR UI REVIEW
+    /* 
+    // OLD CODE: FORCE STATIC MOCK DATA IMMEDIATELY FOR UI REVIEW
     const generateMockData = () => {
       const mockForecast: ForecastData[] = Array.from({ length: 30 }).map((_, i) => {
         const date = new Date();
@@ -98,6 +99,36 @@ function ItemDetailPage() {
     }, 400);
 
     return () => clearTimeout(timer);
+    */
+
+    // NEW CODE: Real API Fetch Call
+    const fetchForecastData = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/forecast/${itemId}?district=${district || ""}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch forecast data");
+        }
+        const result = await response.json();
+        // If the backend returns a message instead of data, handle it
+        if (result.message) {
+          setData(null);
+        } else {
+          setData(result);
+        }
+      } catch (error) {
+        console.error("Error fetching forecast:", error);
+        setData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (itemId && district) {
+      fetchForecastData();
+    } else {
+      setLoading(false);
+    }
   }, [itemId, district]);
 
   const isBuyNow = data?.advice === "Buy Now";

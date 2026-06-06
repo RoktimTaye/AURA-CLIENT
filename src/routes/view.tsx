@@ -57,6 +57,7 @@ function ViewPage() {
           item: d.item_name,
           price: `₹${Math.round(d.price_modal)}/${d.unit}`,
           range: d.price_range === "N/A" ? "N/A" : `₹${d.price_range}/${d.unit}`,
+          district: d.district,
           locality: d.locality_full,
           trust: d.votes,
           status: d.status === "APPROVED" ? "Verified" : "Pending"
@@ -132,7 +133,7 @@ function ViewPage() {
         to: "/view/$itemId", 
         params: { itemId: row.itemId.toString() },
         search: { 
-          district: row.locality.split(' ')[0], 
+          district: row.district || row.locality.split(' ')[0], 
           itemName: row.item 
         } 
       });
