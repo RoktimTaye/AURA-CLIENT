@@ -5,6 +5,7 @@ import { BackButton } from "@/components/aura/BackButton";
 import { PageShell } from "@/components/aura/PageShell";
 import { setSession } from "@/lib/auth";
 import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 export const Route = createFileRoute("/admin/signup")({
   head: () => ({ meta: [{ title: "Admin Sign Up — AURA" }] }),
@@ -31,30 +32,43 @@ function Field({
   type = "text",
   placeholder,
   value,
-  onChange
+  onChange,
+  disabled
 }: {
   label: string;
   type?: string;
   placeholder: string;
   value?: string;
-  onChange?: (e:
-    React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
+  const inputType = isPassword ? (show ? "text" : "password") : type;
+
   return (
     <div>
-      <label className="text-xs font-medium
-  uppercase tracking-wider
-  text-muted-foreground">{label}</label>
-      <input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        className="mt-2 w-full rounded-xl border
-  border-border bg-background px-4 py-3 text-sm
-  outline-none transition-all focus:border-mint
-  focus:shadow-glow-sm"
-      />
+      <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</label>
+      <div className="relative mt-2">
+        <input
+          type={inputType}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm outline-none transition-all focus:border-mint focus:shadow-glow-sm disabled:opacity-50 pr-11"
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            disabled={disabled}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+          >
+            {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

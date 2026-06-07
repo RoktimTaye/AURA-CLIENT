@@ -3,7 +3,9 @@ import { Search, Plus, X, Loader2 } from "lucide-react";
 import { GroceryTable } from "@/components/aura/GroceryTable";
 import type { GroceryRow } from "@/components/aura/data";
 import { UploadForm } from "@/components/aura/UploadForm";
+import { EditForm } from "@/components/aura/EditForm";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +26,8 @@ function DataPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [editingRow, setEditingRow] = useState<GroceryRow | null>(null);
+  const [deletingRow, setDeletingRow] = useState<GroceryRow | null>(null);
   const [district, setDistrict] = useState("");
   const [item, setItem] = useState("");
   const [page, setPage] = useState(1);
@@ -44,7 +48,8 @@ function DataPage() {
       const skip = (page - 1) * pageSize;
       const query = new URLSearchParams({
         limit: pageSize.toString(),
-        skip: skip.toString()
+        skip: skip.toString(),
+        is_admin: "true"
       });
       if (searchParams.district) query.append("district", searchParams.district);
       if (searchParams.item) query.append("item", searchParams.item);
@@ -61,6 +66,7 @@ function DataPage() {
           item: d.item_name,
           price: `₹${Math.round(d.price_modal)}/${d.unit}`,
           range: d.price_range === "N/A" ? "N/A" : `₹${d.price_range}/${d.unit}`,
+          district: d.district,
           locality: d.locality_full,
           trust: d.votes,
           status: d.status === "APPROVED" ? "Verified" : "Pending"
@@ -129,14 +135,60 @@ function DataPage() {
     voteMutation.mutate({ entryId, upvote: !hasVoted });
   };
 
+  const statusMutation = useMutation({
+    mutationFn: async ({ entryId, newStatus }: { entryId: number; newStatus: "APPROVED" | "PENDING" }) => {
+      const response = await fetch(`/api/admin/entry/${entryId}/status?status=${newStatus}`, {
+        method: 'PUT',
+      });
+      if (!response.ok) throw new Error("Status update failed");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+    }
+  });
+
+  const handleStatusToggle = (row: GroceryRow) => {
+    const newStatus = row.status === "Verified" ? "PENDING" : "APPROVED";
+    statusMutation.mutate({ entryId: row.id, newStatus });
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: async (entryId: number) => {
+      const response = await fetch(`/api/admin/entry/${entryId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error("Delete failed");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Entry deleted successfully");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to delete entry");
+    }
+  });
+
+  const handleDelete = (row: GroceryRow) => {
+    setDeletingRow(row);
+  };
+
+  const confirmDelete = () => {
+    if (deletingRow) {
+      deleteMutation.mutate(deletingRow.id);
+    }
+  };
+
   const handleRowClick = (row: GroceryRow) => {
     if (row.itemId) {
       navigate({ 
         to: "/view/$itemId", 
         params: { itemId: row.itemId.toString() },
         search: { 
-          district: row.locality.split(' ')[0], 
-          itemName: row.item 
+          district: row.district || row.locality.split(' ')[0], 
+          itemName: row.item,
+          from: "/admin/data"
         } 
       });
     } else {
@@ -240,6 +292,9 @@ function DataPage() {
           rows={rows} 
           onRowClick={handleRowClick} 
           onVote={handleVote}
+          onStatusToggle={handleStatusToggle}
+          onEdit={setEditingRow}
+          onDelete={handleDelete}
           votedIds={votedIds}
           showStatus 
           showActions 
@@ -249,6 +304,105 @@ function DataPage() {
           onPageChange={setPage}
         />
       )}
+
+      {/* Edit Form Dialog */}
+      <Dialog open={!!editingRow} onOpenChange={(open) => !open && setEditingRow(null)}>
+        <DialogPortal forceMount>
+          <AnimatePresence>
+            {editingRow && (
+              <>
+                <DialogOverlay asChild forceMount>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+                  />
+                </DialogOverlay>
+                <DialogPrimitive.Content asChild forceMount>
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                      className="relative w-full max-w-xl"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <EditForm 
+                        row={editingRow} 
+                        queryKey={queryKey} 
+                        onClose={() => setEditingRow(null)} 
+                      />
+                      <DialogPrimitive.Close className="absolute right-6 top-6 flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground transition-all hover:bg-muted hover:text-foreground">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Close</span>
+                      </DialogPrimitive.Close>
+                    </motion.div>
+                  </div>
+                </DialogPrimitive.Content>
+              </>
+            )}
+          </AnimatePresence>
+        </DialogPortal>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deletingRow} onOpenChange={(open) => !open && setDeletingRow(null)}>
+        <DialogPortal forceMount>
+          <AnimatePresence>
+            {deletingRow && (
+              <>
+                <DialogOverlay asChild forceMount>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+                  />
+                </DialogOverlay>
+                <DialogPrimitive.Content asChild forceMount>
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                      className="relative w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-soft text-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h2 className="text-2xl font-semibold tracking-tight text-foreground">Delete Entry</h2>
+                      <p className="mt-3 text-sm text-muted-foreground">
+                        Are you sure you want to delete this row?
+                      </p>
+                      
+                      <div className="mt-8 flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setDeletingRow(null)}
+                          className="flex flex-1 items-center justify-center rounded-xl border border-border bg-card py-3.5 text-sm font-semibold text-foreground transition-all hover:bg-muted"
+                        >
+                          No
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            confirmDelete();
+                            setDeletingRow(null);
+                          }}
+                          className="flex flex-1 items-center justify-center rounded-xl bg-destructive py-3.5 text-sm font-semibold text-destructive-foreground transition-transform hover:scale-[1.02]"
+                        >
+                          Yes
+                        </button>
+                      </div>
+                    </motion.div>
+                  </div>
+                </DialogPrimitive.Content>
+              </>
+            )}
+          </AnimatePresence>
+        </DialogPortal>
+      </Dialog>
     </div>
   );
 }

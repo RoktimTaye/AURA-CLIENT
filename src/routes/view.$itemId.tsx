@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 type ViewSearch = {
   district?: string;
   itemName?: string;
+  from?: string;
 };
 
 export const Route = createFileRoute("/view/$itemId")({
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/view/$itemId")({
     return {
       district: search.district as string | undefined,
       itemName: search.itemName as string | undefined,
+      from: search.from as string | undefined,
     };
   },
   component: ItemDetailPage,
@@ -60,7 +62,7 @@ interface PredictionResponse {
 
 function ItemDetailPage() {
   const { itemId } = Route.useParams();
-  const { district, itemName } = Route.useSearch();
+  const { district, itemName, from } = Route.useSearch();
   const [data, setData] = useState<PredictionResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -145,7 +147,7 @@ function ItemDetailPage() {
     <PageShell>
       {/* Header */}
       <div className="relative flex items-center justify-between">
-        <BackButton to="/view" />
+        <BackButton to={from || "/view"} />
         <div className="absolute inset-x-0 top-1/2 flex -translate-y-1/2 justify-center pointer-events-none">
           <div className="pointer-events-auto">
             <Logo />

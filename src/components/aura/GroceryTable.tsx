@@ -14,6 +14,9 @@ export function GroceryTable({
   onPageChange,
   onVote,
   votedIds = [],
+  onStatusToggle,
+  onEdit,
+  onDelete,
 }: {
   rows: GroceryRow[];
   showStatus?: boolean;
@@ -25,6 +28,9 @@ export function GroceryTable({
   currentPage?: number;
   pageSize?: number;
   onPageChange?: (page: number) => void;
+  onStatusToggle?: (row: GroceryRow) => void;
+  onEdit?: (row: GroceryRow) => void;
+  onDelete?: (row: GroceryRow) => void;
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -89,25 +95,43 @@ export function GroceryTable({
                 </td>
                 {showStatus && (
                   <td className="px-5 py-4">
-                    <span
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onStatusToggle?.(row);
+                      }}
+                      disabled={!onStatusToggle}
                       className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium",
+                        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80 active:scale-95",
                         row.status === "Verified"
                           ? "bg-mint-soft text-foreground"
                           : "bg-orange-100 text-orange-700",
+                        !onStatusToggle && "pointer-events-none"
                       )}
                     >
                       {row.status}
-                    </span>
+                    </button>
                   </td>
                 )}
                 {showActions && (
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <button className="text-muted-foreground transition-colors hover:text-foreground">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit?.(row);
+                        }}
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button className="text-muted-foreground transition-colors hover:text-destructive">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete?.(row);
+                        }}
+                        className="text-muted-foreground transition-colors hover:text-destructive"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
