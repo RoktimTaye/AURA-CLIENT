@@ -283,13 +283,9 @@ function DataPage() {
         )}
       </div>
 
-      {loading && rows.length === 0 ? (
-        <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-border bg-card/50">
-          <Loader2 className="h-8 w-8 animate-spin text-mint" />
-        </div>
-      ) : (
         <GroceryTable 
           rows={rows} 
+          isLoading={loading}
           onRowClick={handleRowClick} 
           onVote={handleVote}
           onStatusToggle={handleStatusToggle}
@@ -303,7 +299,6 @@ function DataPage() {
           pageSize={pageSize}
           onPageChange={setPage}
         />
-      )}
 
       {/* Edit Form Dialog */}
       <Dialog open={!!editingRow} onOpenChange={(open) => !open && setEditingRow(null)}>

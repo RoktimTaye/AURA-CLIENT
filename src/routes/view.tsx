@@ -197,23 +197,19 @@ function ViewPage() {
         )}
       </div>
       
-      {loading && rows.length === 0 ? (
-        <div className="flex h-40 items-center justify-center rounded-2xl border border-dashed border-border">
-          <Loader2 className="h-6 w-6 animate-spin text-mint" />
-        </div>
-      ) : (
+      <div className="mt-8">
         <GroceryTable 
           rows={rows} 
+          isLoading={loading}
           onRowClick={handleRowClick} 
-          onVote={handleVote}
+          onVote={handleVote} 
           votedIds={votedIds}
-          showStatus 
           totalCount={totalCount}
           currentPage={page}
           pageSize={pageSize}
           onPageChange={setPage}
         />
-      )}
+      </div>
     </PageShell>
   );
 }

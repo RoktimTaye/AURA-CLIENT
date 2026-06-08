@@ -2,6 +2,7 @@ import { ThumbsUp, Pencil, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import type { GroceryRow } from "./data";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function GroceryTable({
   rows,
@@ -17,6 +18,7 @@ export function GroceryTable({
   onStatusToggle,
   onEdit,
   onDelete,
+  isLoading = false,
 }: {
   rows: GroceryRow[];
   showStatus?: boolean;
@@ -31,6 +33,7 @@ export function GroceryTable({
   onStatusToggle?: (row: GroceryRow) => void;
   onEdit?: (row: GroceryRow) => void;
   onDelete?: (row: GroceryRow) => void;
+  isLoading?: boolean;
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -58,87 +61,108 @@ export function GroceryTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, i) => (
-              <motion.tr
-                key={row.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04, duration: 0.3 }}
-                onClick={() => onRowClick?.(row)}
-                className={cn(
-                  "border-t border-border transition-colors hover:bg-mint-soft/30",
-                  onRowClick && "cursor-pointer"
-                )}
-              >
-                <td className="px-5 py-4 text-muted-foreground">{(currentPage - 1) * pageSize + i + 1}</td>
-                <td className="px-5 py-4 font-medium">{row.item}</td>
-                <td className="px-5 py-4">{row.price}</td>
-                <td className="px-5 py-4 text-muted-foreground">{row.range}</td>
-                <td className="px-5 py-4">{row.locality}</td>
-                <td className="px-5 py-4">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onVote?.(row.id);
-                    }}
-                    className={cn(
-                      "inline-flex items-center gap-1.5 transition-all active:scale-95 hover:scale-110",
-                      votedIds.includes(row.id) ? "text-mint font-bold" : "text-muted-foreground hover:text-foreground"
-                    )}
-                  >
-                    {formatVotes(row.trust)}
-                    <ThumbsUp
-                      className="h-3.5 w-3.5"
-                      fill={votedIds.includes(row.id) ? "currentColor" : "none"}
-                    />
-                  </button>
+            {isLoading ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <tr key={`sk-${i}`} className="border-t border-border">
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-4" /></td>
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-32" /></td>
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-16" /></td>
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-24" /></td>
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-28" /></td>
+                  <td className="px-5 py-4"><Skeleton className="h-4 w-12" /></td>
+                  {showStatus && <td className="px-5 py-4"><Skeleton className="h-6 w-16 rounded-full" /></td>}
+                  {showActions && <td className="px-5 py-4"><Skeleton className="h-4 w-12" /></td>}
+                </tr>
+              ))
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={showStatus ? (showActions ? 8 : 7) : 6} className="px-5 py-8 text-center text-muted-foreground">
+                  No data available
                 </td>
-                {showStatus && (
+              </tr>
+            ) : (
+              rows.map((row, i) => (
+                <motion.tr
+                  key={row.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                  onClick={() => onRowClick?.(row)}
+                  className={cn(
+                    "border-t border-border transition-colors hover:bg-mint-soft/30",
+                    onRowClick && "cursor-pointer"
+                  )}
+                >
+                  <td className="px-5 py-4 text-muted-foreground">{(currentPage - 1) * pageSize + i + 1}</td>
+                  <td className="px-5 py-4 font-medium">{row.item}</td>
+                  <td className="px-5 py-4">{row.price}</td>
+                  <td className="px-5 py-4 text-muted-foreground">{row.range}</td>
+                  <td className="px-5 py-4">{row.locality}</td>
                   <td className="px-5 py-4">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onStatusToggle?.(row);
+                        onVote?.(row.id);
                       }}
-                      disabled={!onStatusToggle}
                       className={cn(
-                        "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80 active:scale-95",
-                        row.status === "Verified"
-                          ? "bg-mint-soft text-foreground"
-                          : "bg-orange-100 text-orange-700",
-                        !onStatusToggle && "pointer-events-none"
+                        "inline-flex items-center gap-1.5 transition-all active:scale-95 hover:scale-110",
+                        votedIds.includes(row.id) ? "text-mint font-bold" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      {row.status}
+                      {formatVotes(row.trust)}
+                      <ThumbsUp
+                        className="h-3.5 w-3.5"
+                        fill={votedIds.includes(row.id) ? "currentColor" : "none"}
+                      />
                     </button>
                   </td>
-                )}
-                {showActions && (
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-3">
-                      <button 
+                  {showStatus && (
+                    <td className="px-5 py-4">
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onEdit?.(row);
+                          onStatusToggle?.(row);
                         }}
-                        className="text-muted-foreground transition-colors hover:text-foreground"
+                        disabled={!onStatusToggle}
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium transition-all hover:opacity-80 active:scale-95",
+                          row.status === "Verified"
+                            ? "bg-mint-soft text-foreground"
+                            : "bg-orange-100 text-orange-700",
+                          !onStatusToggle && "pointer-events-none"
+                        )}
                       >
-                        <Pencil className="h-4 w-4" />
+                        {row.status}
                       </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDelete?.(row);
-                        }}
-                        className="text-muted-foreground transition-colors hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                )}
-              </motion.tr>
-            ))}
+                    </td>
+                  )}
+                  {showActions && (
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit?.(row);
+                          }}
+                          className="text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDelete?.(row);
+                          }}
+                          className="text-muted-foreground transition-colors hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
+                </motion.tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

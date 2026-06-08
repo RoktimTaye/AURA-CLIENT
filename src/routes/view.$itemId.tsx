@@ -26,6 +26,7 @@ import {
 import { Logo } from "@/components/aura/Logo";
 import { PageShell } from "@/components/aura/PageShell";
 import { BackButton } from "@/components/aura/BackButton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 // Define search params to get district from the previous page
@@ -156,8 +157,62 @@ function ItemDetailPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-[60vh] items-center justify-center">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-mint border-t-transparent" />
+        <div className="mt-10 space-y-8 pb-20">
+          {/* Skeleton Hero Card & Quick Stats */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <div className="relative overflow-hidden rounded-4xl border border-border bg-card/50 p-8 md:p-12 shadow-soft">
+                <div className="relative z-10 flex flex-col justify-between h-full gap-8 md:flex-row md:items-center">
+                  <div className="flex flex-col items-center md:items-start space-y-4 w-full">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-14 w-3/4 sm:h-16 md:h-20 md:w-80" />
+                    <Skeleton className="h-6 w-40" />
+                  </div>
+                  <div className="flex flex-col items-center md:items-end space-y-4 w-full">
+                    <Skeleton className="h-24 w-64 rounded-xl" />
+                    <Skeleton className="h-12 w-60" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Skeleton Quick Stats Grid */}
+            <div className="grid grid-cols-1 gap-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="glass-card flex items-center gap-4 rounded-2xl border border-border p-6 shadow-soft">
+                  <Skeleton className="h-12 w-12 rounded-xl" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Skeleton Main Chart Section */}
+          <div className="glass-card rounded-4xl border border-border p-8 shadow-soft">
+            <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div className="space-y-3">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-64" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+            </div>
+            <Skeleton className="h-[400px] w-full rounded-2xl" />
+          </div>
+
+          {/* Skeleton Footer Info */}
+          <div className="flex flex-col items-center justify-center gap-4 mt-8">
+            <Skeleton className="h-10 w-10 rounded-full" />
+            <div className="space-y-3 flex flex-col items-center">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-64" />
+            </div>
+          </div>
         </div>
       ) : !data || !data.forecast ? (
         <div className="mt-20 text-center">
@@ -251,10 +306,6 @@ function ItemDetailPage() {
                 <p className="text-sm text-muted-foreground text-balance">Historical price trends merged with Prophet AI future predictions.</p>
               </div>
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full bg-foreground" />
-                  <span className="text-xs font-medium uppercase tracking-wider">Present</span>
-                </div>
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-mint" />
                   <span className="text-xs font-medium uppercase tracking-wider">AI Forecast</span>

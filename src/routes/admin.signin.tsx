@@ -6,6 +6,7 @@ import { Logo } from "@/components/aura/Logo";
 import { BackButton } from "@/components/aura/BackButton";
 import { PageShell } from "@/components/aura/PageShell";
 import { setSession } from "@/lib/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/admin/signin")({
   head: () => ({ meta: [{ title: "Admin Sign In — AURA" }] }),
@@ -19,6 +20,7 @@ function SignIn() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorOpen, setErrorOpen] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +51,11 @@ function SignIn() {
         // Navigate to the admin dashboard
         navigate({ to: "/admin" });
       } else {
-        alert("Invalid email or password");
+        setErrorOpen(true);
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("An error occurred during sign in");
+      setErrorOpen(true);
     } finally {
       setIsLoading(false);
     }
@@ -130,6 +132,26 @@ function SignIn() {
           </p>
         </form>
       </motion.div>
+      
+      <Dialog open={errorOpen} onOpenChange={setErrorOpen}>
+        <DialogContent className="max-w-sm rounded-3xl p-8">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Sign In Failed</DialogTitle>
+            <DialogDescription className="mt-2 text-sm text-muted-foreground">
+              The email or password you entered is incorrect. Please double-check your credentials and try again.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-6">
+            <button
+              type="button"
+              onClick={() => setErrorOpen(false)}
+              className="w-full rounded-xl bg-foreground py-3 text-sm font-semibold uppercase tracking-wider text-background transition-all hover:scale-[1.02] active:scale-95"
+            >
+              Try Again
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageShell>
   );
 }
