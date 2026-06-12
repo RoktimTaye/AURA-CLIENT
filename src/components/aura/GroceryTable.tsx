@@ -19,6 +19,7 @@ export function GroceryTable({
   onEdit,
   onDelete,
   isLoading = false,
+  emptyStateMessage = "No data available",
 }: {
   rows: GroceryRow[];
   showStatus?: boolean;
@@ -34,6 +35,7 @@ export function GroceryTable({
   onEdit?: (row: GroceryRow) => void;
   onDelete?: (row: GroceryRow) => void;
   isLoading?: boolean;
+  emptyStateMessage?: string;
 }) {
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -77,7 +79,7 @@ export function GroceryTable({
             ) : rows.length === 0 ? (
               <tr>
                 <td colSpan={showStatus ? (showActions ? 8 : 7) : 6} className="px-5 py-8 text-center text-muted-foreground">
-                  No data available
+                  {emptyStateMessage}
                 </td>
               </tr>
             ) : (

@@ -12,31 +12,42 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin/analytics")({
   head: () => ({ meta: [{ title: "Analytics — AURA Admin" }] }),
   component: Analytics,
 });
 
-const bars = [
-  { day: "May 14", uploads: 120, verified: 80 },
-  { day: "May 15", uploads: 180, verified: 130 },
-  { day: "May 16", uploads: 150, verified: 110 },
-  { day: "May 17", uploads: 220, verified: 170 },
-  { day: "May 18", uploads: 260, verified: 200 },
-  { day: "May 19", uploads: 300, verified: 240 },
-  { day: "May 20", uploads: 280, verified: 220 },
-];
-
-const pie = [
-  { name: "Rice", value: 45, color: "oklch(0.78 0.2 150)" },
-  { name: "Tea", value: 20, color: "oklch(0.55 0.18 150)" },
-  { name: "Sugar", value: 15, color: "oklch(0.7 0.05 250)" },
-  { name: "Dal", value: 10, color: "oklch(0.4 0.02 250)" },
-  { name: "Others", value: 10, color: "oklch(0.85 0.05 80)" },
-];
-
 function Analytics() {
+  const { data: analytics } = useQuery({
+    queryKey: ["adminAnalytics"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/analytics");
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/stats");
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const bars = analytics?.bars || [];
+  const pie = analytics?.pie || [];
+  const pieTotal = analytics?.total || 0;
+
+  const totalRecords = stats?.totalRecords || 0;
+  const verifiedItems = stats?.verifiedItems || 0;
+  const pendingItems = stats?.pendingItems || 0;
+
   return (
     <div className="space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -45,9 +56,9 @@ function Analytics() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {[
-          { label: "Total Records", value: "1,248", delta: "+12.5%" },
-          { label: "Verified Items", value: "842", delta: "+8.2%" },
-          { label: "Pending Items", value: "406", delta: "-2.1%" },
+          { label: "Total Records", value: totalRecords, delta: "+12.5%" },
+          { label: "Verified Items", value: verifiedItems, delta: "+8.2%" },
+          { label: "Pending Items", value: pendingItems, delta: "-2.1%" },
         ].map((s, i) => (
           <motion.div
             key={s.label}
@@ -103,7 +114,7 @@ function Analytics() {
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-semibold">1,248</span>
+              <span className="text-2xl font-semibold">{pieTotal.toLocaleString()}</span>
               <span className="text-xs text-muted-foreground">Total</span>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Upload, Search, ArrowRight, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Dashboard — AURA Admin" }] }),
@@ -65,6 +66,20 @@ function StatCard({
 }
 
 function Dashboard() {
+  const { data: stats } = useQuery({
+    queryKey: ["adminStats"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/stats");
+      if (!res.ok) throw new Error("Failed to fetch stats");
+      return res.json();
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const total = stats?.totalRecords || 0;
+  const verified = stats?.verifiedItems || 0;
+  const pending = stats?.pendingItems || 0;
+
   return (
     <div className="space-y-8">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
@@ -73,9 +88,9 @@ function Dashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Total Records" value={1248} delta="+12.5%" trend="up" delay={0.05} />
-        <StatCard label="Verified Items" value={842} delta="+8.2%" trend="up" delay={0.15} />
-        <StatCard label="Pending Items" value={406} delta="-2.1%" trend="down" delay={0.25} />
+        <StatCard label="Total Records" value={total} delta="+12.5%" trend="up" delay={0.05} />
+        <StatCard label="Verified Items" value={verified} delta="+8.2%" trend="up" delay={0.15} />
+        <StatCard label="Pending Items" value={pending} delta="-2.1%" trend="down" delay={0.25} />
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
