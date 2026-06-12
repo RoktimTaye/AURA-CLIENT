@@ -162,15 +162,16 @@ function ItemDetailPage() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <div className="relative overflow-hidden rounded-4xl border border-border bg-card/50 p-8 md:p-12 shadow-soft">
-                <div className="relative z-10 flex flex-col justify-between h-full gap-8 md:flex-row md:items-center">
+                <div className="relative z-10 flex flex-col justify-between h-full gap-8 md:flex-row md:items-start">
                   <div className="flex flex-col items-center md:items-start space-y-4 w-full">
                     <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-14 w-3/4 sm:h-16 md:h-20 md:w-80" />
+                    <Skeleton className="h-24 w-3/4 md:w-80" />
                     <Skeleton className="h-6 w-40" />
                   </div>
                   <div className="flex flex-col items-center md:items-end space-y-4 w-full">
-                    <Skeleton className="h-24 w-64 rounded-xl" />
-                    <Skeleton className="h-12 w-60" />
+                    <div className="hidden md:block h-4 w-full" />
+                    <Skeleton className="h-24 w-64 max-w-full rounded-xl" />
+                    <Skeleton className="h-12 w-64 max-w-full" />
                   </div>
                 </div>
               </div>
@@ -235,29 +236,36 @@ function ItemDetailPage() {
                 "glass-card shadow-glow-sm transition-all",
                 isBuyNow ? "border-mint/30 bg-mint-soft/20" : "border-orange-200/50 bg-orange-50/30"
               )}>
-                <div className="relative z-10 flex flex-col justify-between h-full gap-8 md:flex-row md:items-center">
-                  <div className="flex flex-col items-center text-center md:items-start md:text-left">
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                <div className="relative z-10 flex flex-col justify-between h-full gap-8 md:flex-row md:items-start">
+                  <div className="flex flex-col items-center text-center md:items-start md:text-left space-y-4 w-full">
+                    <span className="flex items-center h-4 text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
                       AI Market Intelligence
                     </span>
-                    <h1 className="mt-2 max-w-full text-4xl font-bold tracking-tighter uppercase text-balance sm:text-5xl md:text-6xl lg:text-7xl wrap-break-word">
+                    <h1 className={cn(
+                      "flex flex-col justify-center h-24 max-w-full font-bold tracking-tighter uppercase text-balance wrap-break-word leading-none",
+                      (itemName || "Item").length > 20 ? "text-3xl sm:text-3xl md:text-3xl lg:text-3xl" :
+                      (itemName || "Item").length > 12 ? "text-4xl sm:text-4xl md:text-4xl lg:text-4xl" :
+                      "text-5xl sm:text-6xl md:text-6xl lg:text-7xl"
+                    )}>
                       {itemName || "Item"}
                     </h1>
-                    <div className="mt-4 flex items-center justify-center gap-2 text-muted-foreground md:justify-start">
+                    <div className="flex items-center justify-center gap-2 text-muted-foreground md:justify-start">
                       <MapPin className="h-4 w-4 text-mint" />
                       <span className="text-lg font-medium">{district || "All India"}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-center md:items-end">
+                  <div className="flex flex-col items-center md:items-end space-y-4 w-full">
+                    {/* Invisible spacer to perfectly align the identical h-24 blocks vertically on desktop */}
+                    <div className="hidden md:block h-4 w-full" />
                     <div className={cn(
-                      "flex h-24 w-64 items-center justify-center gap-3 rounded-xl shadow-glow transition-all hover:scale-105",
+                      "flex h-24 w-64 max-w-full items-center justify-center gap-3 rounded-xl shadow-glow transition-all hover:scale-105",
                       isBuyNow ? "bg-foreground text-background" : "bg-card border border-orange-200 text-orange-700"
                     )}>
                       {isBuyNow ? <TrendingDown className="h-8 w-8 text-mint" /> : <Clock className="h-8 w-8" />}
                       <span className="text-2xl font-bold uppercase tracking-tight">{data.advice}</span>
                     </div>
-                    <p className="mt-4 max-w-60 text-center md:text-right text-sm leading-relaxed text-muted-foreground">
+                    <p className="w-64 max-w-full text-center md:text-left text-sm leading-relaxed text-muted-foreground">
                       {isBuyNow 
                         ? "Prices are currently at a local minimum. Our AI suggests stocks are stable for now." 
                         : `Prices are expected to drop significantly by ${chartData[chartData.length - 1]?.date || 'next week'}.`}
