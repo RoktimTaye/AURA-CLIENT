@@ -10,7 +10,7 @@ export const Route = createFileRoute("/admin/")({
   component: Dashboard,
 });
 
-function useCount(target: number, duration = 1200) {
+function useCount(target: number, duration = 600) {
   const [n, setN] = useState(0);
   useEffect(() => {
     const start = performance.now();
@@ -44,7 +44,7 @@ function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.5 }}
+      transition={{ delay: 0, duration: 0.2 }}
       className="rounded-2xl border border-border bg-card p-6 shadow-soft"
     >
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
@@ -74,6 +74,7 @@ function Dashboard() {
       return res.json();
     },
     staleTime: 1000 * 60 * 5,
+    refetchInterval: 3000,
   });
 
   const total = stats?.totalRecords || 0;
@@ -88,9 +89,9 @@ function Dashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Total Records" value={total} delta="+12.5%" trend="up" delay={0.05} />
-        <StatCard label="Verified Items" value={verified} delta="+8.2%" trend="up" delay={0.15} />
-        <StatCard label="Pending Items" value={pending} delta="-2.1%" trend="down" delay={0.25} />
+        <StatCard label="Total Records" value={total} delta="+12.5%" trend="up" delay={0} />
+        <StatCard label="Verified Items" value={verified} delta="+8.2%" trend="up" delay={0} />
+        <StatCard label="Pending Items" value={pending} delta="-2.1%" trend="down" delay={0} />
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">

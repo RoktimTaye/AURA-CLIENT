@@ -136,20 +136,42 @@ function DataPage() {
   };
 
   const statusMutation = useMutation({
-    mutationFn: async ({ entryId, newStatus }: { entryId: number; newStatus: "APPROVED" | "PENDING" }) => {
+    mutationFn: async ({ entryId, newStatus }: { entryId: number; newStatus: "APPROVED" | "FLAGGED" }) => {
       const response = await fetch(`/api/admin/entry/${entryId}/status?status=${newStatus}`, {
         method: 'PUT',
       });
       if (!response.ok) throw new Error("Status update failed");
       return response.json();
     },
-    onSuccess: () => {
+    onMutate: async ({ entryId, newStatus }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+      
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          rows: old.rows.map((row: GroceryRow) =>
+            row.id === entryId ? { ...row, status: newStatus === "APPROVED" ? "Verified" : "Pending" } : row
+          )
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (err, variables, context: any) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(queryKey, context.previousData);
+      }
+      toast.error("Failed to update status");
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey });
     }
   });
 
   const handleStatusToggle = (row: GroceryRow) => {
-    const newStatus = row.status === "Verified" ? "PENDING" : "APPROVED";
+    const newStatus = row.status === "Verified" ? "FLAGGED" : "APPROVED";
     statusMutation.mutate({ entryId: row.id, newStatus });
   };
 

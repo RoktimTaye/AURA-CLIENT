@@ -28,6 +28,7 @@ function Analytics() {
       return res.json();
     },
     staleTime: 1000 * 60 * 5,
+    refetchInterval: 3000,
   });
 
   const { data: stats } = useQuery({
@@ -38,6 +39,7 @@ function Analytics() {
       return res.json();
     },
     staleTime: 1000 * 60 * 5,
+    refetchInterval: 3000,
   });
 
   const bars = analytics?.bars || [];
@@ -64,7 +66,7 @@ function Analytics() {
             key={s.label}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
+            transition={{ delay: 0, duration: 0.2 }}
             className="rounded-2xl border border-border bg-card p-6 shadow-soft"
           >
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{s.label}</p>
@@ -93,8 +95,8 @@ function Analytics() {
                     fontSize: 12,
                   }}
                 />
-                <Bar dataKey="uploads" fill="oklch(0.78 0.2 150)" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="verified" fill="oklch(0.93 0.005 250)" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="uploads" fill="oklch(0.78 0.2 150)" radius={[6, 6, 0, 0]} animationDuration={800} />
+                <Bar dataKey="verified" fill="oklch(0.93 0.005 250)" radius={[6, 6, 0, 0]} animationDuration={800} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -105,7 +107,7 @@ function Analytics() {
           <div className="relative h-56">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pie} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={2}>
+                <Pie data={pie} dataKey="value" innerRadius={55} outerRadius={85} paddingAngle={2} animationDuration={800}>
                   {pie.map((p) => (
                     <Cell key={p.name} fill={p.color} stroke="none" />
                   ))}
