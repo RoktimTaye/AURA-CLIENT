@@ -66,7 +66,7 @@ function StatCard({
 }
 
 function Dashboard() {
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading } = useQuery({
     queryKey: ["adminStats"],
     queryFn: async () => {
       const res = await fetch("/api/admin/stats");
@@ -89,9 +89,19 @@ function Dashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Total Records" value={total} delta="+12.5%" trend="up" delay={0} />
-        <StatCard label="Verified Items" value={verified} delta="+8.2%" trend="up" delay={0} />
-        <StatCard label="Pending Items" value={pending} delta="-2.1%" trend="down" delay={0} />
+        {isLoading ? (
+          <>
+            <div className="h-[120px] rounded-2xl border border-border bg-card/50 shadow-soft animate-pulse" />
+            <div className="h-[120px] rounded-2xl border border-border bg-card/50 shadow-soft animate-pulse" />
+            <div className="h-[120px] rounded-2xl border border-border bg-card/50 shadow-soft animate-pulse" />
+          </>
+        ) : (
+          <>
+            <StatCard label="Total Records" value={total} delta="+12.5%" trend="up" delay={0} />
+            <StatCard label="Verified Items" value={verified} delta="+8.2%" trend="up" delay={0} />
+            <StatCard label="Pending Items" value={pending} delta="-2.1%" trend="down" delay={0} />
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
