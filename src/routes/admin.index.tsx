@@ -11,18 +11,19 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function useCount(target: number, duration = 600) {
-  const [n, setN] = useState(0);
+  const startValue = target > 0 ? 1 : 0;
+  const [n, setN] = useState(startValue);
   useEffect(() => {
     const start = performance.now();
     let raf = 0;
     const step = (t: number) => {
       const p = Math.min((t - start) / duration, 1);
-      setN(Math.floor(p * target));
+      setN(Math.floor(startValue + p * (target - startValue)));
       if (p < 1) raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [target, duration]);
+  }, [target, duration, startValue]);
   return n;
 }
 
@@ -73,7 +74,7 @@ function Dashboard() {
       if (!res.ok) throw new Error("Failed to fetch stats");
       return res.json();
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
     refetchInterval: 3000,
   });
 
