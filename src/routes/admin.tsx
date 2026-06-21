@@ -49,8 +49,6 @@ const nav: NavItem[] = [
   { to: "/admin/verified", label: "Verified Items", icon: CheckCircle2 },
   { to: "/admin/pending", label: "Pending Items", icon: Clock },
   { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 function AdminLayout() {

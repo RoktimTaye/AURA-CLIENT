@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { ArrowRight, Database, BarChart3, LineChart } from "lucide-react";
+import { ArrowRight, Apple, Carrot, Banana } from "lucide-react";
 import { Logo } from "@/components/aura/Logo";
 import { GlowBackground } from "@/components/aura/GlowBackground";
 
@@ -90,13 +90,13 @@ function Landing() {
         <div className="relative h-[420px]">
           <div className="glow-orb absolute inset-0 m-auto h-[380px] w-[380px] opacity-80" />
           <FloatingIcon className="absolute right-12 top-4" delay={0.1}>
-            <Database className="h-7 w-7 text-mint" strokeWidth={1.5} />
+            <Apple className="h-7 w-7 text-mint" strokeWidth={1.5} />
           </FloatingIcon>
           <FloatingIcon className="absolute left-8 top-32" delay={0.3}>
-            <LineChart className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+            <Carrot className="h-7 w-7 text-foreground" strokeWidth={1.5} />
           </FloatingIcon>
           <FloatingIcon className="absolute bottom-12 right-20" delay={0.5}>
-            <BarChart3 className="h-7 w-7 text-foreground" strokeWidth={1.5} />
+            <Banana className="h-7 w-7 text-foreground" strokeWidth={1.5} />
           </FloatingIcon>
         </div>
       </section>
