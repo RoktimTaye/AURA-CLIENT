@@ -4,7 +4,7 @@
 [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind%20CSS-v4-06B6D4?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
 
-**Aura** is a next-generation price transparency platform designed to empower communities with real-time, verified data on local commodity prices. Built with a focus on speed, accuracy, and user experience, Aura leverages Machine Learning (ML) to detect price anomalies and forecast future trends.
+**Aura** is a modern based price transparency platform designed to empower communities with real-time, verified data on local commodity prices. Built with a focus on speed, accuracy, and user experience, Aura leverages Machine Learning (ML) to detect price anomalies and forecast future trends.
 
 ---
 
@@ -13,7 +13,7 @@
 - **📍 Real-time Price Tracking:** View and report live prices for groceries, fuel, and other essentials based on your location.
 - **🛡️ ML-Powered Verification:** Automated anomaly detection (Z-Score) identifies and flags suspicious price reports to prevent spam.
 - **📈 Price Forecasting:** Advanced time-series analysis using **Meta's Prophet** to predict price trends for the next 7 days.
-- **🗳️ Community Voting:** A democratic verification system where users upvote or downvote entries to ensure data integrity.
+- **🗳️ Community Voting:** A democratic verification system where users can vote entries to ensure data integrity.
 - **📊 Admin Dashboard:** Comprehensive analytics and moderation tools for managing data streams and user activity.
 - **⚡ Server-Side Rendering (SSR):** Powered by TanStack Start for lightning-fast initial loads and superior SEO.
 
@@ -35,7 +35,6 @@
 - **API Framework:** [FastAPI](https://fastapi.tiangolo.com/) (Python)
 - **Database:** [PostgreSQL](https://www.postgresql.org/) (Neon Serverless)
 - **ML Engine:** Meta Prophet (Forecasting), NumPy (Anomaly Detection)
-- **Deployment:** [Cloudflare Pages/Workers](https://workers.cloudflare.com/)
 
 ---
 
